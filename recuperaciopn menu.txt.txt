@@ -1,0 +1,196 @@
+import cv2
+import os
+import imutils #util para la redimencionamiento de imagenete
+import shutil
+import pickle
+
+# Ruta donde se almacenan los datos
+dataPath = '/home/pi/Desktop/recuperacion/proyectos Python/Imagenometria/codigos prueba con objetos /Data'
+personas_pickle="/home/pi/Desktop/recuperacion/proyectos Python/Imagenometria/codigos prueba con objetos /personas.pkl"
+# Ruta del clasificador Haar para la detección de caras
+ClassPath = "/home/omarpi/Desktop/proyectos Python/Imagenometria/haarcascade_frontalface_default.xml"
+
+# Lista de nombres de las carpetas en 'dataPath' (cada carpeta representa a una persona)
+peopleList = os.listdir(dataPath)
+print(peopleList)
+
+# Generamos un vector donde llamara el nombre de las personas
+personas = []
+
+# se crea la clase cliente 
+class cliente:
+    def __init__(self,nombre,gusto,):
+        cliente.nombre = nombre
+        cliente.gusto = gusto
+
+# Guardamos el objeto personas con Pickle
+def guardar_objeto(personas):
+   with open(personas_pickle,"wb") as fichero:
+        pickle.dump(personas,fichero)
+
+# definimos agregaar persona
+def agregar_persona():
+    peopleList = os.listdir(dataPath)
+    nombre = input("Ingrese el nombre de la persona:")
+    for nombre_existente in peopleList:
+        if nombre == nombre_existente:  
+            print("ese nombre ya existe dentro de la lista")
+            opcion=input("1. Cancelar Accion. \n 2. Ingresar otro nombre")
+            
+            if opcion == "1": return
+            elif opcion == "2":
+                nombre = input("Ingrese otro nombre:")
+    
+    gusto =int(input("del uno al 5 que tan fuerte te gustan los tragos:"))
+    
+    persona=cliente(nombre,gusto)
+  
+    personas.append(persona)
+        #guardamos el objeto personas con Pickle
+    with open(personas_pickle,"wb") as fichero:
+        pickle.dump(personas,fichero)
+    
+    print(f"{nombre} ha sido agregado a la lista de personas.")
+    
+    # Creamos la carpeta para la nueva persona si no existe:
+    Name = persona.nombre
+    personPath =dataPath+"/" + Name
+    if not os.path.exists(personPath):
+        print("carpeta creada",personPath)
+        os.makedirs(personPath)
+        
+    #Inicializacion de caputa de imagenes:
+    cap = cv2.VideoCapture(0)  # Cambiar a 'cap = cv2.VideoCapture(videoPath)' para usar un video
+    
+    # Inicializa el clasificador haar para deteccion de rostros
+    faceClassif = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    
+    #Inicializamos un contador para el numero e imageneres de rostros capturados
+    count=0
+    
+    while True:
+        ret, frame = cap.read()
+    
+        if ret == False:
+            print("No se pudo obtener un fotograma del video.")
+            break
+        
+        # Redimensionamos el fotograma para que tenga un ancho de 640 píxeles
+        frame = imutils.resize(frame, width=640)
+
+        # Convertimos el fotograma a escala de grises
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+        auxFrame = frame.copy()
+
+        # Detectamos caras en el fotograma
+        faces = faceClassif.detectMultiScale(gray, 1.3, 5)
+
+        for (x, y, w, h) in faces:
+            # Dibujamos un rectángulo alrededor de la cara detectada
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
+            # Recortamos la región de la cara
+            rostro = auxFrame[y:y + h, x:x + h]
+
+            # Redimensionamos la imagen del rostro a 150x150 píxeles
+            rostro = cv2.resize(rostro, (150, 150), interpolation=cv2.INTER_CUBIC)
+
+            # Guardamos la imagen del rostro en la carpeta correspondiente
+            cv2.imwrite(personPath + '/rostro_{}.jpg'.format(count), rostro)
+            count = count + 1
+
+        cv2.imshow('frame', frame)
+
+        # Esperamos 1 milisegundo y comprobamos si se presionó la tecla 'Esc' o se capturaron más de 100 imágenes
+        k = cv2.waitKey(1)
+        if k == 27 or count > 100:
+            break
+        #Libreamos la camara y cerramos todas las ventanas
+    cap.release()
+    cv2.destroyAllWindows()
+    
+    guardar_objeto(personas)
+    
+
+# imprimira una caracteristica de una persona solamente
+def imprimir_caracteristicas():
+    
+    nombre = input("Ingrese el nombre de la persona cual caracteristicas desea:")
+    for persona in personas:
+        if persona.nombre == nombre:
+            print(f"Nombre: {persona.nombre}")
+            print(f"gusto: {persona.gusto}")
+            return
+    print(f"No se encontró a ninguna persona con el nombre {nombre}.")
+
+
+# imprime todos los usuarios contenidos
+def imprimir_personas():
+    for usuario in personas:
+            print(f"Nombre: {usuario.nombre}")
+            print(f"gusto: {usuario.gusto}")
+    
+# Elimina a un usuario
+def eliminar_persona():       
+    nombre = input("Ingrese el nombre de la persona cual caracteristicas desea:")
+    for persona in personas.nombre:
+        if persona.nombre() == nombre:
+            personas.remove(persona)
+            
+            #eliminamos ruta
+            Name = nombre
+            personPath =dataPath + Name
+            print("Eliminando...")
+            try:
+                # Elimina todo los archivos dentro de la carpeta
+                for filename in os.listdir(personPath):
+                    file_path = os.path.join(personPath,filename)
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+                    os.remove(file_path)
+                # Luego eliminamos la carpeta vacía    
+                os.rmdir(personPath)
+                break
+            except OSError as e:
+                print(f"Error:{e.strerror}")
+                break
+            print(f"{nombre} ha sido temovida.")
+            return
+    print(f"No se encontro alguien llamado asi")
+    
+    guardar_objeto(personas)
+
+# Creamos la carpeta para la nueva persona si no existe
+
+while True:
+    
+
+
+        #print("guardando personas...")      
+    #cargamos el objeto personas con Picle
+    with open(personas_pickle,"rb") as fichero:
+        personas=pickle.load(fichero)
+        #print("cargando memoria de usuarios y gustos...") 
+    #Desplegamos Menu
+    print("######################################")
+    print("menu:")
+    print("1. Crear usuario.")
+    print("2. Imprimir datos de usuario.")
+    print("3. Imprimir a todos los usuarios.")
+    print("4. borrar usuario")
+    print("5. salir")
+    
+    opcion= input("Seleccione una opccion:")
+    
+    if opcion == "1":
+        agregar_persona()
+    elif opcion == "2":
+        imprimir_caracteristicas()
+    elif opcion == "3":
+        imprimir_personas()
+    elif opcion == "4":
+        eliminar_persona()
+    elif opcion == "5": break
+
+    #print(personas)
