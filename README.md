@@ -18,7 +18,9 @@ Librerias necesarias para funcionamiento:
 - Os (Python Wheel) /Ceacion y modificacion de directorios.
 - Imutils /Permite remover archivos dentro de un directorio o crear carpetas vacias.
 - Pickle /Almacena objetos dentro de archivos .pkl
-- numpy
+- numpy.
+- time.
+- RPi.GPIO.
 
 
 Hardware Actual:
