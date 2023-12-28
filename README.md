@@ -17,7 +17,8 @@ Librerias necesarias para funcionamiento:
 - Opencv-contrib-python /Reconocimiento y deteccion facial.
 - Os (Python Wheel) /Ceacion y modificacion de directorios.
 - Imutils /Permite remover archivos dentro de un directorio o crear carpetas vacias.
-- Pickle /Almacena objetos dentro de archivos .pkl 
+- Pickle /Almacena objetos dentro de archivos .pkl
+- numpy
 
 
 Hardware Actual:
